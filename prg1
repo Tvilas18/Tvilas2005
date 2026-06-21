@@ -1,0 +1,44 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+local_file_path = "C:/datasets/housing.csv"  # <-- Change this path
+data = pd.read_csv(local_file_path)
+
+print("First few rows of the dataset:\n", data.head())
+
+numerical_features = data.select_dtypes(include=[np.number]).columns.tolist()
+
+# 1. Histograms
+print("\nCreating histograms for all numerical features...")
+data[numerical_features].hist(bins=30, figsize=(15, 10), color='skyblue', edgecolor='black')
+plt.suptitle('Histograms of California Housing Features (Offline)', fontsize=16)
+plt.show()
+
+# 2. Distribution analysis
+print("\nDistribution Analysis:")
+for feature in numerical_features:
+    skewness = data[feature].skew()
+    kurtosis = data[feature].kurtosis()
+    print(f"{feature}: Skewness = {skewness:.2f}, Kurtosis = {kurtosis:.2f}")
+
+# 3. Box plots for outlier detection
+print("\nGenerating box plots for all numerical features...")
+plt.figure(figsize=(15, 10))
+for i, feature in enumerate(numerical_features, 1):
+    plt.subplot(3, 3, i)
+    sns.boxplot(y=data[feature], color='lightgreen')
+    plt.title(f'Boxplot of {feature}')
+plt.tight_layout()
+plt.show()
+
+# 4. Identify outliers using IQR
+print("\nIdentifying outliers using IQR method:")
+for feature in numerical_features:
+    Q1 = data[feature].quantile(0.25)
+    Q3 = data[feature].quantile(0.75)
+    IQR = Q3 - Q1
+    outliers = data[(data[feature] < (Q1 - 1.5 * IQR)) | (data[feature] > (Q3 + 1.5 * IQR))]
+    print(f"{feature}: {len(outliers)} outliers detected.")
+
